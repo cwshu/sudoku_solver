@@ -1,0 +1,7 @@
+file bin/sudoku_solver
+set args test/example_9x9.txt /tmp/1 minisat/MiniSat_v1.14_linux
+
+set follow-fork-mode parent
+
+br 121
+# br SudokuSolver::clause_list_to_DIMACS
