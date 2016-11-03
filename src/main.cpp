@@ -16,14 +16,19 @@
 #include <cstdlib>
 
 #include "sudoku_solver.h"
+#include "utils.h"
 
 // const char WHITESPACE[] = " \t\r\n\v\f"
 const char DIGIT[] = "0123456789";
 const char DIGIT_NEG[] = "-0123456789";
 
-std::vector<int32_t> split_number(std::string line);
+/** @brief parse sudoku input, parse single line */
 std::vector<uint32_t> parse_line(std::string line);
-void print_sudoku_puzzle(const std::vector<std::vector<uint32_t>>& puzzle);
+/** @brief parse SAT solver output, split SAT solution(variable = true/false) */
+std::vector<int32_t> split_number(std::string line);
+
+void print_sudoku_puzzle(const vector_2d<uint32_t>& puzzle);
+void print_sudoku_solution(std::fstream& output_file, const vector_2d<uint32_t>& puzzle);
 
 void minisat_solver(std::string executable, std::string& input_data, std::string& output_data, bool& is_satisfied){
     const char INPUT_FILE[] = "/tmp/minisat_in";
@@ -84,8 +89,8 @@ int main(int argc, char *argv[]){
     }
 
     // 1. parse sudoku puzzle
-    // sudoku puzzle use 1-based array, index 0 is nouse.
-    std::vector<std::vector<uint32_t>> sudoku_puzzle;
+    // sudoku puzzle use 1-based array, index 0 is ignored.
+    vector_2d<uint32_t> sudoku_puzzle;
 
     std::string line;
     std::getline(input_file, line);
@@ -95,7 +100,7 @@ int main(int argc, char *argv[]){
     uint32_t sudoku_size = static_cast<uint32_t>( std::sqrt(static_cast<double>(sudoku_size_square)) );
     
     sudoku_puzzle.resize(sudoku_size_square+1);
-    sudoku_puzzle[0] = std::vector<uint32_t>(sudoku_size_square+1, 0); // initial zero
+    sudoku_puzzle[0] = std::vector<uint32_t>(sudoku_size_square+1, 0); // ignore row 0
     sudoku_puzzle[1] = numbers;
 
     for( int i = 2; i <= sudoku_size_square; i++ ){
@@ -105,7 +110,9 @@ int main(int argc, char *argv[]){
         sudoku_puzzle[i] = numbers;
     }
 
+#ifdef DEBUG
     print_sudoku_puzzle(sudoku_puzzle);
+#endif
 
     // 2. to DS
     SudokuSolver solver(sudoku_puzzle, sudoku_size);
@@ -130,38 +137,30 @@ int main(int argc, char *argv[]){
     std::vector<int32_t> sat_output_num = split_number(sat_output);
     solver.decode(sat_output_num);
 
+#ifdef DEBUG
     print_sudoku_puzzle(solver.puzzle);
+#endif
+
+    // 6. output solution
+    print_sudoku_solution(output_file, solver.puzzle);
+
+    input_file.close();
+    output_file.close();
 
     return 0;
 }
 
-std::vector<int32_t> split_number(std::string line){
-    std::vector<int32_t> numbers;
-
-    std::size_t offset = 0;
-    offset = line.find_first_of(DIGIT_NEG, 0);
-
-    while( 1 ){
-        // digit
-        std::size_t found = line.find_first_not_of(DIGIT_NEG, offset);
-
-        // [EOF]: exit
-        if( found == std::string::npos ){
-            if( offset != std::string::npos ){
-                int32_t num = std::stoi(line.substr(offset));
-                numbers.push_back(num);
+void print_sudoku_solution(std::fstream& output_file, const vector_2d<uint32_t>& puzzle){
+    for( auto row_iter = std::next(puzzle.cbegin(), 1); row_iter != puzzle.cend(); row_iter++ ){
+        for( auto col_iter = std::next(row_iter->cbegin(), 1); col_iter != row_iter->cend(); col_iter++ ){
+            if( std::next(col_iter, 1) == row_iter->cend() ){
+                output_file << *col_iter << std::endl;
             }
-            break;
-        }
-
-        int32_t num = std::stoi(line.substr(offset, found-offset));
-        numbers.push_back(num);
-
-        // not digit
-        offset = line.find_first_of(DIGIT_NEG, found);
+            else{
+                output_file << *col_iter << " ";
+            }
+        }        
     }
-
-    return numbers;
 }
 
 std::vector<uint32_t> parse_line(std::string line){
@@ -204,7 +203,36 @@ std::vector<uint32_t> parse_line(std::string line){
     return numbers;
 }
 
-void print_sudoku_puzzle(const std::vector<std::vector<uint32_t>>& puzzle){
+std::vector<int32_t> split_number(std::string line){
+    std::vector<int32_t> numbers;
+
+    std::size_t offset = 0;
+    offset = line.find_first_of(DIGIT_NEG, 0);
+
+    while( 1 ){
+        // digit
+        std::size_t found = line.find_first_not_of(DIGIT_NEG, offset);
+
+        // [EOF]: exit
+        if( found == std::string::npos ){
+            if( offset != std::string::npos ){
+                int32_t num = std::stoi(line.substr(offset));
+                numbers.push_back(num);
+            }
+            break;
+        }
+
+        int32_t num = std::stoi(line.substr(offset, found-offset));
+        numbers.push_back(num);
+
+        // not digit
+        offset = line.find_first_of(DIGIT_NEG, found);
+    }
+
+    return numbers;
+}
+
+void print_sudoku_puzzle(const vector_2d<uint32_t>& puzzle){
 
     for( const auto& line : puzzle ){
         for( const auto& number : line ){

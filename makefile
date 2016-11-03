@@ -4,7 +4,7 @@
 CC       = gcc
 CFLAGS   = -std=c99 -g
 CXX      = clang++
-CXXFLAGS = -std=c++11 -g
+CXXFLAGS = -std=c++11 -g -DDEBUG
 
 MAKE     = make
 DOXYGEN  = doxygen

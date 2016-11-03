@@ -20,7 +20,7 @@ uint32_t SudokuSolver::count_block(uint32_t row, uint32_t col){
     return 3 * ((row-1)/3) + (col-1)/3 + 1;
 }
 
-SudokuSolver::SudokuSolver(std::vector<std::vector<uint32_t>> puzzle, uint32_t size) : puzzle(puzzle), size(size), encoder(size*size) {
+SudokuSolver::SudokuSolver(vector_2d<uint32_t> puzzle, uint32_t size) : puzzle(puzzle), size(size), encoder(size*size) {
 
     row_numbers_use.resize(size_square()+1, std::vector<bool>(size_square()+1, false));
     row_empty_cells.resize(size_square()+1, std::vector<uint32_t>());
@@ -57,9 +57,9 @@ void SudokuSolver::prepare(){
 
 void SudokuSolver::gen_unuse_numbers(){
     // numbers_use to unuse_numbers for speed
-    row_unuse_numbers = std::vector<std::vector<uint32_t>>(size_square()+1, std::vector<uint32_t>());
-    col_unuse_numbers = std::vector<std::vector<uint32_t>>(size_square()+1, std::vector<uint32_t>());
-    block_unuse_numbers = std::vector<std::vector<uint32_t>>(size_square()+1, std::vector<uint32_t>());
+    row_unuse_numbers = vector_2d<uint32_t>(size_square()+1, std::vector<uint32_t>());
+    col_unuse_numbers = vector_2d<uint32_t>(size_square()+1, std::vector<uint32_t>());
+    block_unuse_numbers = vector_2d<uint32_t>(size_square()+1, std::vector<uint32_t>());
 
     for( uint32_t row = 1; row <= size_square(); row++ ){
         for( uint32_t number = 1; number <= size_square(); number++ ){

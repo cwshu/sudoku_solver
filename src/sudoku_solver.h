@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "utils.h"
+
 struct SudokuVariable {
     bool is_valid;
     uint32_t row;
@@ -24,20 +26,16 @@ struct SudokuVariable {
 struct Encoder {
     // counter start from 1, 0 for no mapping
     // row, col, number use 1-based array
-    std::vector<std::vector<std::vector<uint32_t>>> to_number;
+
+    // [row][col][number] => variable_number
+    vector_3d<uint32_t> to_number;
+    // [row][col][number] <= variable_number
     std::unordered_map<uint32_t, SudokuVariable> to_variable;
     uint32_t counter;
 
     Encoder(uint32_t size_square) {
         // std::cout << "size: " << size_square << std::endl;
-        to_number = std::vector<std::vector<std::vector<uint32_t>>>(
-          size_square+1,
-          std::vector<std::vector<uint32_t>>(
-            size_square+1,
-            std::vector<uint32_t>(
-              size_square+1,
-              0)));
-
+        to_number = vector_3d<uint32_t>(size_square+1, vector_2d<uint32_t>(size_square+1, std::vector<uint32_t>(size_square+1, 0)));
         counter = 1;
     }
 
@@ -80,22 +78,22 @@ struct EncodeVariable {
     EncodeVariable(uint32_t encode_num, bool is_positive=true) : is_positive(is_positive), encode_num(encode_num) {}
 };
 
-typedef std::vector<EncodeVariable> Clause;
+using Clause = std::vector<EncodeVariable>;
 
 class SudokuSolver {
 public:
-    std::vector<std::vector<uint32_t>> puzzle;
+    vector_2d<uint32_t> puzzle;
 
-    std::vector<std::vector<bool>> row_numbers_use;
-    std::vector<std::vector<uint32_t>> row_empty_cells;
-    std::vector<std::vector<bool>> col_numbers_use;
-    std::vector<std::vector<uint32_t>> col_empty_cells;
-    std::vector<std::vector<bool>> block_numbers_use;
-    std::vector<std::vector<std::pair<uint32_t, uint32_t>>> block_empty_cells;
+    vector_2d<bool> row_numbers_use;
+    vector_2d<uint32_t> row_empty_cells;
+    vector_2d<bool> col_numbers_use;
+    vector_2d<uint32_t> col_empty_cells;
+    vector_2d<bool> block_numbers_use;
+    vector_2d<std::pair<uint32_t, uint32_t>> block_empty_cells;
 
-    std::vector<std::vector<uint32_t>> row_unuse_numbers;
-    std::vector<std::vector<uint32_t>> col_unuse_numbers;
-    std::vector<std::vector<uint32_t>> block_unuse_numbers;
+    vector_2d<uint32_t> row_unuse_numbers;
+    vector_2d<uint32_t> col_unuse_numbers;
+    vector_2d<uint32_t> block_unuse_numbers;
 
     Encoder encoder;
     std::vector<Clause> clause_list;
@@ -104,7 +102,7 @@ public:
     uint32_t size_square(){ return size*size; }
     static uint32_t count_block(uint32_t row, uint32_t col);
 
-    SudokuSolver(std::vector<std::vector<uint32_t>> puzzle, uint32_t size);
+    SudokuSolver(vector_2d<uint32_t> puzzle, uint32_t size);
 
     /** @brief preprocess some data into data structure */
     void prepare();
