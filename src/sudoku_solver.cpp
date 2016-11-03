@@ -6,7 +6,7 @@
 #include "sudoku_solver.h"
 #include <iostream>
 
-uint32_t SudokuSolver::count_block(uint32_t row, uint32_t col){
+uint32_t SudokuSolver::count_block(uint32_t row, uint32_t col) const {
     /*
      * block: 
      *   1, 2, 3
@@ -16,8 +16,10 @@ uint32_t SudokuSolver::count_block(uint32_t row, uint32_t col){
      * row => 1, 4, 7 => 3n
      * col => 3n+1, 3n+2, 3n+3
      * block = 3 * (row-1)/3 + (col-1)/3 + 1;
+     *
+     * 3 => size for other size
      */
-    return 3 * ((row-1)/3) + (col-1)/3 + 1;
+    return size * ((row-1)/size) + (col-1)/size + 1;
 }
 
 SudokuSolver::SudokuSolver(vector_2d<uint32_t> puzzle, uint32_t size) : puzzle(puzzle), size(size), encoder(size*size) {

@@ -99,8 +99,8 @@ public:
     std::vector<Clause> clause_list;
 
     uint32_t size;
-    uint32_t size_square(){ return size*size; }
-    static uint32_t count_block(uint32_t row, uint32_t col);
+    uint32_t size_square() const { return size*size; }
+    uint32_t count_block(uint32_t row, uint32_t col) const;
 
     SudokuSolver(vector_2d<uint32_t> puzzle, uint32_t size);
 

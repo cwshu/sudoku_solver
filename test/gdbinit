@@ -1,5 +1,6 @@
 file bin/sudoku_solver
-set args test/example_9x9.txt /tmp/1 minisat/MiniSat_v1.14_linux
+# set args test/example_9x9.txt /tmp/1 minisat/MiniSat_v1.14_linux
+set args test/example_16x16.txt /tmp/1 minisat/MiniSat_v1.14_linux
 
 set follow-fork-mode parent
 
